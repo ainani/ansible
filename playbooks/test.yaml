@@ -1,0 +1,9 @@
+---
+
+- hosts : all
+  remote_user: padtec
+  tasks:
+
+          - name : Echo Hello
+            command: ls
+            #shell: echo Hello
