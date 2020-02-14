@@ -1,0 +1,26 @@
+- hosts: localhost
+  tasks:
+  - name: Work around a python issue that doesn't support no_proxy envvar
+    get_url:
+     url: "http://{{ ip_address }}:8080/nodemanager"
+     dest: /etc/ansible/abhishek/nm.conf
+     use_proxy: no
+    register: uri_data
+    vars:
+     ip_address: 172.19.79.144
+  - debug:
+          msg: "{{ uri_data }}"
+
+  - name: check nexus
+    get_url:
+     url: "http://172.19.79.144:8080/nodemanager/"
+     dest: /tmp/abc.txt
+    register: nexus_result
+  - debug:
+          msg: "{{ nexus_result }}"
+    until: nexus_result.msg|OK 
+    retries: 10
+    delay: 15
+    failed_when: nexus_result is failure
+  - debug:
+          msg: "{{ nexus_result }}"

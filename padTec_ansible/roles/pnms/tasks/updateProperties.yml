@@ -1,0 +1,18 @@
+  - name: Updating installPNMS.properties file
+    lineinfile:
+     path: "{{ install_dir }}/{{ untar_dir }}/bin/installPNMS.properties"
+     regexp: '^INSTALL_PADNMS_DIR='
+     line: INSTALL_PADNMS_DIR={{ install_dir }}/{{ untar_dir }}/etc
+
+  - name: Updating installPNMS.properties file
+    lineinfile:
+      path: "{{ install_dir }}/{{ untar_dir }}/bin/installPNMS.properties"
+      regexp: '^INSTALL_PNMS_DIR='
+      line: INSTALL_PNMS_DIR={{ install_dir }}/{{ untar_dir }}/pnmsinstall
+
+  - name: Updating installPNMS.properties file
+    lineinfile:
+      path: "{{ install_dir }}/{{ untar_dir }}/bin/installPNMS.properties"
+      regexp: '^INSTALL_MED_DIR='
+      line: INSTALL_MED_DIR={{ install_dir }}/{{ untar_dir }}/medinstall
+

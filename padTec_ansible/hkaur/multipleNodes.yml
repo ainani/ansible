@@ -1,0 +1,44 @@
+- hosts: NMS_IP_BKP
+  gather_facts: no
+  vars:
+          buildPath: "{{ hostvars['nms_ip-1'].buildPath }}"
+          install_dir: "{{ hostvars['nms_ip-1'].installDir }}"
+  tasks:
+  - name:
+    debug:
+          msg: "{{ hostvars[item].mediator_ip }}"
+    loop: "{{ groups['NMS_IP_BKP'] }}"
+    when: hostvars[item].ansible_host == ansible_host
+  - debug:
+          msg: "{{ hostvars[item].top_ip }}"
+    loop: "{{ groups['NMS_IP_BKP'] }}"
+    when: hostvars[item].ansible_host == ansible_host
+
+- hosts: NMS_IP_BKP
+  gather_facts: no
+  vars:
+    nms_ip: "{{  hostvars[item].ansible_host }}"
+    med_ip: "{{ hostvars[item].mediator_ip  }}"
+    top_ip: "{{ hostvars[item].top_ip  }}"
+  tasks:
+    # construct list
+    - set_fact:
+        nms_ip_list: "{{ (nms_ip_list | default([])) + [nms_ip] }}"
+        med_ip_list: "{{ (med_ip_list | default([])) + [med_ip] }}"
+        top_ip_list: "{{ (top_ip_list | default([])) + [top_ip] }}"
+      loop: "{{ groups['NMS_IP_BKP'] }}"
+    - debug:
+        msg: "{{ nms_ip_list }}"
+    - debug:
+        msg: "{{ med_ip_list }}"
+    - debug:
+        msg: "{{ top_ip_list }}"
+
+- hosts: localhost
+  gather_facts: no
+  tasks:
+  - debug:
+          msg: "IP name is {{ ansible_host }}"
+    with_items: 
+    - "{{ nms_ip_list }}"
+

@@ -10,3 +10,4 @@ https://stackoverflow.com/questions/40027847/accessing-inventory-host-variable-i
 https://stackoverflow.com/questions/37225589/execute-ansible-task-on-different-hosts
 https://stackoverflow.com/questions/39347379/ansible-run-command-on-remote-host-in-background
 https://www.decodingdevops.com/
+https://serverfault.com/questions/875247/whats-the-difference-between-include-tasks-and-import-tasks

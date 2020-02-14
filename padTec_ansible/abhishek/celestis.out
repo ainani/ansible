@@ -1,0 +1,23 @@
+<html xmlns="http://www.w3.org/1999/xhtml"><head id="j_idt2">
+  <title>Celestis NMS Login</title>
+  <link rel="stylesheet" href="formauth_style/bootstrap.min.css" />
+  <link rel="stylesheet" href="formauth_style/login.css" />
+  <script type="text/javascript" src="formauth_style/jquery.min.js"></script></head><body class="small login">
+    <div id="wrapper">
+        <div id="logo">
+            <img src="formauth_style/Celestis_NMS_CMYK.png" />
+        </div>
+        <div id="divider"></div>
+        <div id="form_wrapper">
+            <form name="login_form" method="post" action="AuthenticationService">
+                <input style="margin-bottom: 5px" class="form-control" tabindex="1" type="text" name="username" id="username" placeholder="username" />
+                <input style="margin-bottom: 10px" class="form-control" tabindex="2" type="password" name="password" id="password" placeholder="password" />
+                <input style="margin-bottom: 10px" class="form-control" tabindex="3" type="hidden" name="userTimeZone" id="userTimeZone" />
+                <input class="btn btn btn-primary bprimarypub80" type="submit" tabindex="5" value="Login" />
+                  <input type="hidden" name="destination" id="destination" value="http://172.19.79.36:8080/celestis/index.jsp"/>
+                
+            </form>
+        </div>
+    </div>
+    <script type="text/javascript" src="formauth_style/login.js"></script></body>
+</html>

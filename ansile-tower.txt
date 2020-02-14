@@ -1,0 +1,5 @@
+https://www.postgresql.org/ftp/source/v12.1/
+https://www.virtualizationhowto.com/2018/03/install-and-configure-ansible-tower-in-ubuntu-server/
+https://releases.ansible.com/ansible-tower/setup-bundle/ansible-tower-setup-bundle-latest.tar.gz
+
+

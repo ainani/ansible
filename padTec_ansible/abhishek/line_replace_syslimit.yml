@@ -1,0 +1,285 @@
+# This playbook runs a basic DF command.
+- hosts: NMS_1
+  become: yes
+
+  tasks:
+  - name: Increasing limits
+    pam_limits:
+            domain: padtec
+            limit_type: soft
+            limit_item: nofile
+            value: 64000
+    tags:
+     - sys_limit
+- hosts: NMS_1
+  #remote_user: root
+  vars:
+       isHA: "{{ lookup('ini', 'isHA section=general file=config.ini') }}"
+       install_dir: "{{ lookup('ini', 'installDir section=general file=config.ini') }}"
+       build_name: "{{ lookup('ini', 'buildName section=general file=config.ini') }}"
+       nms_ip_1: "{{ lookup('ini', 'nms_ip_1 section=NMS_1 file=config.ini') }}"
+       med_ip_1: "{{ lookup('ini', 'med_ip_1 section=MED_1 file=config.ini') }}"
+       ncs_ip_1: "{{ lookup('ini', 'ncs_ip_1 section=NCS_1 file=config.ini') }}"
+       top_ip_1: "{{ lookup('ini', 'topology_ip_1 section=TOPOLOGY_1 file=config.ini') }}"
+  tasks:
+  - debug:
+      msg: 
+       - "isHA is set to :  {{ isHA }}"
+       - "Installation Directory:  {{ install_dir }}"
+       - "Build Name:  {{ build_name }}"
+         #- meta: end_play
+  - name: Unarchive the tar.gz
+    unarchive:
+     src: "{{ install_dir }}/{{ build_name }}"
+     dest: "{{ install_dir }}"
+     remote_src: yes
+     list_files: yes
+    register: archive_contents
+  - set_fact:
+      untar_dir: "{{ archive_contents.files[0].split('/')[0] }}"
+      #- debug: 
+      #msg : "{{ archive_contents.files[0] }}"
+  - find:
+     paths: "{{ install_dir }}/{{ untar_dir }}/bin"
+     patterns: "*.properties"
+    register: prop_files
+  - name: Updating properties file common values
+    replace:
+     path: "{{ item.path }}"
+     regexp: '^BUILD_NAME=.*'
+     replace: BUILD_NAME={{ untar_dir }}
+    with_items: "{{ prop_files.files }}" 
+  - replace:
+     path: "{{ item.path }}"
+     regexp: '^PNMS_IP=.*'
+     replace: PNMS_IP={{ nms_ip_1 }}
+    with_items: "{{ prop_files.files }}" 
+  - replace:
+     path: "{{ item.path }}"
+     regexp: '^INSTALL_MED_DIR=.*'
+     replace: INSTALL_MED_DIR={{ install_dir }}/{{ untar_dir }}/medinstall
+    with_items: "{{ prop_files.files }}"
+  - replace:
+     path: "{{ item.path }}"
+     regexp: '^VIRTUAL_IP=.*'
+     replace: VIRTUAL_IP=127.0.0.1
+    when: (isHA | int)==0
+    with_items: "{{ prop_files.files }}"
+  
+
+  - name: Updating installPNMS.properties file
+    lineinfile:
+     path: "{{ install_dir }}/{{ untar_dir }}/bin/installPNMS.properties"
+     regexp: '^INSTALL_PADNMS_DIR='
+     line: INSTALL_PADNMS_DIR={{ install_dir }}/{{ untar_dir }}/etc
+  - lineinfile:
+      path: "{{ install_dir }}/{{ untar_dir }}/bin/installPNMS.properties"
+      regexp: '^INSTALL_PNMS_DIR='
+      line: INSTALL_PNMS_DIR={{ install_dir }}/{{ untar_dir }}/pnmsinstall
+  - lineinfile:
+      path: "{{ install_dir }}/{{ untar_dir }}/bin/installPNMS.properties"
+      regexp: '^INSTALL_MED_DIR='
+      line: INSTALL_MED_DIR={{ install_dir }}/{{ untar_dir }}/medinstall
+
+  - name: Updating installMediator.properties file
+    lineinfile:
+      path: "{{ install_dir }}/{{ untar_dir }}/bin/installMediator.properties"
+      regexp: '^PNMS_IP_ADDRESS='
+      line: PNMS_IP_ADDRESS={{ nms_ip_1 }}
+  - lineinfile:
+      path: "{{ install_dir }}/{{ untar_dir }}/bin/installMediator.properties"
+      regexp: '^MEDIATOR_IP_ADDRESS='
+      line: MEDIATOR_IP_ADDRESS={{ med_ip_1 }}
+
+
+
+  - name: Updating installDomainManager.properties file
+    lineinfile:
+      path: "{{ install_dir }}/{{ untar_dir }}/bin/installDomainManager.properties"
+      regexp: '^INSTALL_DOMAINMANAGER_DIR='
+      line: INSTALL_DOMAINMANAGER_DIR={{ install_dir }}/{{ untar_dir }}/dminstall
+  - lineinfile:
+     path: "{{ install_dir }}/{{ untar_dir }}/bin/installDomainManager.properties"
+     regexp: '^NCS_BINARY_FILE_PATH='
+     line: NCS_BINARY_FILE_PATH={{ install_dir }}/{{ untar_dir }}/pkg/domainmanager/lib
+  - lineinfile:
+     path: "{{ install_dir }}/{{ untar_dir }}/bin/installDomainManager.properties"
+     regexp: '^NCS_BINARY_INSTALL_PATH='
+     line: NCS_BINARY_INSTALL_PATH={{ install_dir }}/{{ untar_dir }}/ncs
+  - lineinfile:
+     path: "{{ install_dir }}/{{ untar_dir }}/bin/installDomainManager.properties"
+     regexp: '^HOST_IP_ADDRESS='
+     line: HOST_IP_ADDRESS={{ ncs_ip_1 }}
+  - lineinfile:
+     path: "{{ install_dir }}/{{ untar_dir }}/bin/installDomainManager.properties"
+     regexp: '^NCS_IP='
+     line: NCS_IP={{ ncs_ip_1 }}
+  - lineinfile:
+     path: "{{ install_dir }}/{{ untar_dir }}/bin/installDomainManager.properties"
+     regexp: '^NODEMANAGER_IP='
+     line: NODEMANAGER_IP={{ ncs_ip_1 }}
+
+
+  - name: Updating installNodeManager.properties file
+    lineinfile:
+      path: "{{ install_dir }}/{{ untar_dir }}/bin/installNodeManager.properties"
+      regexp: '^INSTALL_NODEMANAGER_DIR='
+      line: INSTALL_NODEMANAGER_DIR={{ install_dir }}/{{ untar_dir }}/installnodemanager
+
+  - name: Updating installTopology.properties file
+    lineinfile:
+      path: "{{ install_dir }}/{{ untar_dir }}/bin/installTopology.properties"
+      regexp: '^INSTALL_TOPOLOGY_DIR='
+      line: INSTALL_TOPOLOGY_DIR={{ install_dir }}/{{ untar_dir }}/topologyinstall
+  - lineinfile:
+     path: "{{ install_dir }}/{{ untar_dir }}/bin/installTopology.properties"
+     regexp: '^TOPOLOGY_IP='
+     line: TOPOLOGY_IP={{ top_ip_1 }}
+
+
+  ######Uninstalling Complete System ##############
+  - name: Uninstalling PNMS
+    shell: 
+      cmd: ./uninstallInHaMode.sh
+      chdir: /home/padtec/ansible_abhishek/OTS12_EKINMS_V1.1.16/bin
+    args:
+      executable: /bin/bash
+    register: cmd_output
+    tags:
+     - uninstall
+  - debug:
+     msg: "{{ cmd_output.stdout_lines }}"
+    tags:
+     - uninstall
+  ######## Installing PNMS  ##############
+  - name: Installing PNMS
+    shell: 
+      cmd: whoami; ./installPNMS.sh -install installPNMS.properties
+      chdir: /home/padtec/ansible_abhishek/OTS12_EKINMS_V1.1.16/bin
+    args:
+      executable: /bin/bash
+    register: cmd_output
+  - debug:
+     msg: "{{ cmd_output.stdout_lines }}"
+  ######### Configuring Database ##############
+  - shell: 
+      cmd: ./../etc/configure_database.sh
+      chdir: /home/padtec/ansible_abhishek/OTS12_EKINMS_V1.1.16/bin
+    args:
+      executable: /bin/bash
+    register: cmd_output
+  - debug:
+     msg: "{{ cmd_output.stdout_lines }}"
+  ###### Installing Topology ######
+  - name: Installing Topology
+    shell: 
+      cmd: ./installTopology.sh -install installTopology.properties
+      chdir: /home/padtec/ansible_abhishek/OTS12_EKINMS_V1.1.16/bin
+    args:
+      executable: /bin/bash
+    register: cmd_output
+  - debug:
+     msg: "{{ cmd_output.stdout_lines }}"
+  ###### Installing Mediator ######
+  - name: Installing Mediator
+    shell: 
+      cmd: ./installMediator.sh -install installMediator.properties
+      chdir: /home/padtec/ansible_abhishek/OTS12_EKINMS_V1.1.16/bin
+    args:
+      executable: /bin/bash
+    register: cmd_output
+  - debug:
+     msg: "{{ cmd_output.stdout_lines }}"
+  ########## Installing Domain Manager #############
+  - name: Installing Domain Manager
+    shell: 
+      cmd: ./installDomainManager.sh -install installDomainManager.properties
+      chdir: /home/padtec/ansible_abhishek/OTS12_EKINMS_V1.1.16/bin
+    args:
+      executable: /bin/bash
+    register: cmd_output
+  - debug:
+     msg: "{{ cmd_output.stdout_lines }}"
+  ########## Starting Domain Manager ###############
+  - name: Domain Manager Start
+    shell: 
+      cmd: cd ../dminstall/domainmanager/bin; source ~/.ncs_env; ./rundomainmanager.sh start
+      chdir: /home/padtec/ansible_abhishek/OTS12_EKINMS_V1.1.16/bin
+    args:
+      executable: /bin/bash
+    register: cmd_output
+  - debug:
+     msg: "{{ cmd_output.stdout_lines }}"
+  ########## Populating Node Manager DB ###############
+  - name: Populate Node Manager DB
+    shell: 
+      cmd: ./populateNodeManagerdb.sh installPNMS.properties
+      chdir: /home/padtec/ansible_abhishek/OTS12_EKINMS_V1.1.16/bin
+    args:
+      executable: /bin/bash
+    register: cmd_output
+  - debug:
+     msg: "{{ cmd_output.stdout_lines }}"
+  ########## Updating Notification Pointer ####################
+  - name: Updating Notfication Pointer
+    shell: 
+      cmd: ./updateNotificationPointer.sh
+      chdir: /home/padtec/ansible_abhishek/OTS12_EKINMS_V1.1.16/bin
+    args:
+      executable: /bin/bash
+    register: cmd_output
+  - debug:
+     msg: "{{ cmd_output.stdout_lines }}"
+
+  ########## Copying files remotely #################
+  - name: Copy file from source to dest path
+    copy:
+      src: /etc/ansible/abhishek/startInNonHaMode_nonHA.sh
+      dest: /home/padtec/ansible_abhishek/OTS12_EKINMS_V1.1.16/bin
+    
+  - copy:
+      src: /etc/ansible/abhishek/startInNonHaMode_onlyPNMS.sh
+      dest: /home/padtec/ansible_abhishek/OTS12_EKINMS_V1.1.16/bin
+
+  ########## Changing file ownership remotely #################
+  - name: Changing file ownership
+    file:
+      path: /home/padtec/ansible_abhishek/OTS12_EKINMS_V1.1.16/bin/startInNonHaMode_nonHA.sh
+      mode: '0755'
+
+  - file:
+      path: /home/padtec/ansible_abhishek/OTS12_EKINMS_V1.1.16/bin/startInNonHaMode_onlyPNMS.sh
+      mode: '0755'
+
+  ########## Running startInNonHaMode_nonHA.sh Start script remotely #################
+  - name: Run file startInNonHaMode_nonHA.sh at remote
+    shell:
+      cmd: ./startInNonHaMode_nonHA.sh 
+      chdir: /home/padtec/ansible_abhishek/OTS12_EKINMS_V1.1.16/bin
+    args:
+      executable: /bin/bash
+    register: cmd_output
+    tags:
+     - start
+  - debug:
+     msg: "{{ cmd_output.stdout_lines }}"
+    tags:
+     - start
+
+
+  ########## Running startInNonHaMode_onlyPNMS.sh Start script remotely #################
+  - name: Run file startInNonHaMode_onlyPNMS.sh at dest
+    shell:
+      cmd: ./startInNonHaMode_onlyPNMS.sh 
+      chdir: /home/padtec/ansible_abhishek/OTS12_EKINMS_V1.1.16/bin
+    args:
+      executable: /bin/bash
+    register: cmd_output
+    tags:
+     - start
+  - debug:
+     msg: "{{ cmd_output.stdout_lines }}"
+    tags:
+     - ToBeDone
+
+  - meta: end_play

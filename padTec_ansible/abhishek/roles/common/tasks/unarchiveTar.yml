@@ -1,0 +1,11 @@
+  ########### Unarchive the tar ################
+  - name: Unarchive the tar.gz
+    unarchive:
+     src: "{{ installDir }}/{{ buildName }}"
+     dest: "{{ installDir }}"
+     remote_src: yes
+     list_files: yes
+    register: archive_contents
+  - set_fact:
+      untar_dir: "{{ archive_contents.files[0].split('/')[0] }}"
+

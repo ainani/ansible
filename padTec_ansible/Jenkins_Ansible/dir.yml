@@ -1,0 +1,10 @@
+- hosts: all
+  tasks:
+  - name: Ansible check directory exists example.
+    stat:
+      path: /home/padtec/builds_20191104/OTS12_EKINMS_V1.1.16/pnmsinstall
+    register: dir_exists
+
+  - debug:
+      msg: "{{ dir_exists }}"
+    when: dir_exists.stat.exists and dir_exists.stat.isdir

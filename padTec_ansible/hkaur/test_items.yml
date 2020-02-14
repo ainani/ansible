@@ -1,0 +1,70 @@
+- hosts: localhost
+  tasks:
+    - name: Create a list
+      set_fact:
+         some_value:
+            - avenger
+            - mk11
+            - witcher
+            - gow
+            - saintsrow
+
+    - debug:
+        msg: "{{ some_value }}"
+
+    - name: Print avenger
+      set_fact:
+        avenger_record: "{{ item }}"
+      when: item is defined and item  == 'avenger'
+      with_items: "{{ some_value }}"
+
+    - name: Print mk11
+      set_fact:
+        mk11_record: "{{ item }}"
+      when: item is defined and item  == 'mk11'
+      with_items: "{{ some_value }}"
+
+    - name: Print witcher
+      set_fact:
+        witcher_record: "{{ item }}"
+      when: item is defined and item  == 'witcher'
+      with_items: "{{ some_value }}"
+
+    - name: Print GOW
+      set_fact:
+        gow_record: "{{ item }}"
+      when: item is defined and item  == 'gow'
+      with_items: "{{ some_value }}"
+    - debug:
+            msg: "{{ gow_record }}"
+
+    - name: Print Saintsrow
+      set_fact:
+        saintsrow_record: "{{ item }}"
+      when: item is defined and item  == 'saintsrow'
+      with_items: "{{ some_value }}"
+
+    - name: Create an empty list variable
+      set_fact:
+        best_fav: []
+        good_fav: []
+        better_fav: []
+
+    - name: Append string to list
+      set_fact:
+              #best_fav: "{{ (best_fav | default([])) + [ avenger_record ] + [ mk11_record ] + [ witcher_record ] }}"
+        #        {{ (nms_ip_list | default([])) + [nms_ip] }}
+        best_fav: "{{ best_fav + [ avenger_record ] + [ mk11_record ] + [ witcher_record ] }}"
+        good_fav: "{{ good_fav + [ gow_record ] }}"
+        better_fav: "{{ better_fav + [ saintsrow_record ] }}"
+
+    - debug:
+            msg: " {{ best_fav }} "
+    - name: Display Lists
+      debug:
+        msg: "{{ item }}"
+      with_items:
+         - "{{ best_fav  }}"
+         - "{{ good_fav }}"
+         - "{{ better_fav }}"
+      when: item != None

@@ -1,0 +1,13 @@
+- hosts: localhost
+  connection: local
+  gather_facts: no
+
+  tasks:
+  - shell: 
+     cmd: cat user.json
+    register: result
+
+  - set_fact:
+      myvar: "{{ result.stdout | from_json }}"
+  - debug:
+      msg: "{{ myvar }}"

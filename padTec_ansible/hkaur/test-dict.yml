@@ -1,0 +1,14 @@
+- hosts: localhost
+  tasks:
+  - name: "Reformat configuration file"
+    shell: 
+      cmd: sed '/^ *$/d;s@^\(.*\)=\(.*\)$@\1\ :\ "\2"@g' test.properties
+    args:
+      warn: false
+    register: result
+
+  - name: "Load configuration"
+    set_fact:
+       cfg: "{{ result.stdout | from_yaml }}"
+  - debug:
+       msg: "{{ cfg }}"

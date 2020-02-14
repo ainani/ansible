@@ -1,0 +1,16 @@
+
+#- name: Pull tar file from Build Server
+#  include_tasks: pullBuild.yml
+
+- name: Push tar file to nodes
+  include_tasks: pushBuild.yml
+
+- name: Unarchive the tar.gz
+  include_tasks: unarchiveTar.yml
+
+- name:  Copy start scripts from local to remote
+  include_tasks: copyStartFiles.yml
+
+- name: Update common Prop
+  include_tasks: updateCommonProperties.yml
+

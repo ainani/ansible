@@ -1,0 +1,31 @@
+  - name: Updating properties file common values
+    find:
+     paths: "{{ installDir }}/{{ untar_dir }}/bin"
+     patterns: "*.properties"
+    register: prop_files
+  - name: Updating properties file common values
+    replace:
+     path: "{{ item.path }}"
+     regexp: '^BUILD_NAME=.*'
+     replace: BUILD_NAME={{ untar_dir }}
+    with_items: "{{ prop_files.files }}"
+  - name: Updating properties file common values
+    replace:
+     path: "{{ item.path }}"
+     regexp: '^PNMS_IP=.*'
+     replace: PNMS_IP={{ ansible_host }}
+    with_items: "{{ prop_files.files }}"
+  - name: Updating properties file common values
+    replace:
+     path: "{{ item.path }}"
+     regexp: '^INSTALL_MED_DIR=.*'
+     replace: INSTALL_MED_DIR={{ installDir }}/{{ untar_dir }}/medinstall
+    with_items: "{{ prop_files.files }}"
+  - name: Updating properties file common values
+    replace:
+     path: "{{ item.path }}"
+     regexp: '^VIRTUAL_IP=.*'
+     replace: VIRTUAL_IP=127.0.0.1
+    when: (isHA | int)==0
+    with_items: "{{ prop_files.files }}"
+

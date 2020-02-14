@@ -1,0 +1,11 @@
+  ######### Configuring Database ##############
+  - name: Configuring Database
+    shell:
+      cmd: ./../etc/configure_database.sh
+    args:
+      chdir: "{{ install_dir }}/{{ untar_dir }}/bin" #/home/padtec/ansible_abhishek/OTS12_EKINMS_V1.1.16/bin
+      executable: /bin/bash
+    register: cmd_output
+  - debug:
+     msg: "{{ cmd_output.stdout_lines }}"
+

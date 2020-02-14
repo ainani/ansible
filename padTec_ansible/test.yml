@@ -1,0 +1,14 @@
+- hosts: all
+  tasks:
+  - shell: |
+           nohup ./startInNonHaMode_nonHA.sh > startInNonHaMode_nonHA.log 2>&1 &
+           echo $PWD/startInNonHaMode_nonHA.log
+    args:
+        executable: /bin/bash
+        chdir: "{{ install_dir }}/{{ untar }}/bin"
+  - meta: end_play
+    when: ifexists == true
+
+        
+        
+

@@ -1,0 +1,19 @@
+  - set_fact:
+     med_prop_file: installMediator.properties
+  - name: Uninstall Mediator
+    block:
+      - name: Check if medinstall directory exists
+        stat:
+         path: "{{ install_dir }}/{{ untar_dir }}/medinstall"
+        register: med_dir
+      - set_fact:
+          medDir_ifexists: "{{ med_dir.stat.exists }}"
+
+      - block:
+        - shell: "(cd '{{ install_dir }}/{{ untar_dir }}/bin'; ./installMediator.sh -uninstall  {{ med_prop_file }})"
+          args:
+           executable: /bin/bash
+        when: medDir_ifexists == true
+    tags:
+       - med_uninstall
+

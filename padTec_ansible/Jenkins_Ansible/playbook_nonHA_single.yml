@@ -1,0 +1,373 @@
+# This playbook runs a basic DF command.
+---
+- hosts: all
+  vars:
+          isHA: "{{ hostvars['allInOne_ip'].isHA }}"
+          buildPath: "{{ hostvars['allInOne_ip'].buildPath }}"
+          build_name: "{{ hostvars['allInOne_ip'].buildName }}"
+          install_dir: "{{ hostvars['allInOne_ip'].installDir }}"
+          nms_ip_1: "{{ hostvars['allInOne_ip'].ansible_host }}"
+          med_ip_1: "{{ hostvars['allInOne_ip'].ansible_host }}"
+          ncs_ip_1: "{{ hostvars['allInOne_ip'].ansible_host }}"
+          top_ip_1: "{{ hostvars['allInOne_ip'].ansible_host }}"
+  tasks:
+  - name: Creating install directory
+    stat: 
+     path: "{{ install_dir }}"
+    register: stat_results
+  - file:
+     path: "{{ install_dir }}"
+     state: directory
+    when: stat_results.stat.exists == False
+
+  - name: Push tar file to nodes
+    copy:
+      src: "{{ buildPath }}/{{ buildName }}" #OTS12_EKINMS_V1.1.16.tar.gz
+      dest: "{{ install_dir }}"
+      #follow: yes
+  - name: Unarchive the tar.gz
+    unarchive:
+     src: "{{ install_dir }}/{{ build_name }}"
+     dest: "{{ install_dir }}"
+     remote_src: yes
+     list_files: yes
+    register: archive_contents
+  - set_fact:
+      untar_dir: "{{ archive_contents.files[0].split('/')[0] }}"
+  - name: Updating properties file common values
+    find:
+     paths: "{{ install_dir }}/{{ untar_dir }}/bin"
+     patterns: "*.properties"
+    register: prop_files
+  - name: Updating properties file common values
+    replace:
+     path: "{{ item.path }}"
+     regexp: '^BUILD_NAME=.*'
+     replace: BUILD_NAME={{ untar_dir }}
+    with_items: "{{ prop_files.files }}" 
+  - name: Updating properties file common values
+    replace:
+     path: "{{ item.path }}"
+     regexp: '^PNMS_IP=.*'
+     replace: PNMS_IP={{ nms_ip_1 }}
+    with_items: "{{ prop_files.files }}" 
+  - name: Updating properties file common values
+    replace:
+     path: "{{ item.path }}"
+     regexp: '^INSTALL_MED_DIR=.*'
+     replace: INSTALL_MED_DIR={{ install_dir }}/{{ untar_dir }}/medinstall
+    with_items: "{{ prop_files.files }}"
+  - name: Updating properties file common values
+    replace:
+     path: "{{ item.path }}"
+     regexp: '^VIRTUAL_IP=.*'
+     replace: VIRTUAL_IP=127.0.0.1
+    when: (isHA | int)==0
+    with_items: "{{ prop_files.files }}"
+  
+
+  - name: Updating installPNMS.properties file
+    lineinfile:
+     path: "{{ install_dir }}/{{ untar_dir }}/bin/installPNMS.properties"
+     regexp: '^INSTALL_PADNMS_DIR='
+     line: INSTALL_PADNMS_DIR={{ install_dir }}/{{ untar_dir }}/etc
+
+  - name: Updating installPNMS.properties file
+    lineinfile:
+      path: "{{ install_dir }}/{{ untar_dir }}/bin/installPNMS.properties"
+      regexp: '^INSTALL_PNMS_DIR='
+      line: INSTALL_PNMS_DIR={{ install_dir }}/{{ untar_dir }}/pnmsinstall
+
+  - name: Updating installPNMS.properties file
+    lineinfile:
+      path: "{{ install_dir }}/{{ untar_dir }}/bin/installPNMS.properties"
+      regexp: '^INSTALL_MED_DIR='
+      line: INSTALL_MED_DIR={{ install_dir }}/{{ untar_dir }}/medinstall
+
+  - name: Updating installMediator.properties file
+    lineinfile:
+      path: "{{ install_dir }}/{{ untar_dir }}/bin/installMediator.properties"
+      regexp: '^PNMS_IP_ADDRESS='
+      line: PNMS_IP_ADDRESS={{ nms_ip_1 }}
+
+  - name: Updating installMediator.properties file
+    lineinfile:
+      path: "{{ install_dir }}/{{ untar_dir }}/bin/installMediator.properties"
+      regexp: '^MEDIATOR_IP_ADDRESS='
+      line: MEDIATOR_IP_ADDRESS={{ med_ip_1 }}
+
+
+
+  - name: Updating installDomainManager.properties file
+    lineinfile:
+      path: "{{ install_dir }}/{{ untar_dir }}/bin/installDomainManager.properties"
+      regexp: '^INSTALL_DOMAINMANAGER_DIR='
+      line: INSTALL_DOMAINMANAGER_DIR={{ install_dir }}/{{ untar_dir }}/dminstall
+
+  - name: Updating installDomainManager.properties file
+    lineinfile:
+     path: "{{ install_dir }}/{{ untar_dir }}/bin/installDomainManager.properties"
+     regexp: '^NCS_BINARY_FILE_PATH='
+     line: NCS_BINARY_FILE_PATH={{ install_dir }}/{{ untar_dir }}/pkg/domainmanager/lib
+
+  - name: Updating installDomainManager.properties file
+    lineinfile:
+     path: "{{ install_dir }}/{{ untar_dir }}/bin/installDomainManager.properties"
+     regexp: '^NCS_BINARY_INSTALL_PATH='
+     line: NCS_BINARY_INSTALL_PATH={{ install_dir }}/{{ untar_dir }}/ncs
+
+  - name: Updating installDomainManager.properties file
+    lineinfile:
+     path: "{{ install_dir }}/{{ untar_dir }}/bin/installDomainManager.properties"
+     regexp: '^HOST_IP_ADDRESS='
+     line: HOST_IP_ADDRESS={{ ncs_ip_1 }}
+
+  - name: Updating installDomainManager.properties file
+    lineinfile:
+     path: "{{ install_dir }}/{{ untar_dir }}/bin/installDomainManager.properties"
+     regexp: '^NCS_IP='
+     line: NCS_IP={{ ncs_ip_1 }}
+
+  - name: Updating installDomainManager.properties file
+    lineinfile:
+     path: "{{ install_dir }}/{{ untar_dir }}/bin/installDomainManager.properties"
+     regexp: '^NODEMANAGER_IP='
+     line: NODEMANAGER_IP={{ ncs_ip_1 }}
+
+
+  - name: Updating installNodeManager.properties file
+    lineinfile:
+      path: "{{ install_dir }}/{{ untar_dir }}/bin/installNodeManager.properties"
+      regexp: '^INSTALL_NODEMANAGER_DIR='
+      line: INSTALL_NODEMANAGER_DIR={{ install_dir }}/{{ untar_dir }}/installnodemanager
+
+  - name: Updating installTopology.properties file
+    lineinfile:
+      path: "{{ install_dir }}/{{ untar_dir }}/bin/installTopology.properties"
+      regexp: '^INSTALL_TOPOLOGY_DIR='
+      line: INSTALL_TOPOLOGY_DIR={{ install_dir }}/{{ untar_dir }}/topologyinstall
+
+  - name: Updating installTopology.properties file
+    lineinfile:
+     path: "{{ install_dir }}/{{ untar_dir }}/bin/installTopology.properties"
+     regexp: '^TOPOLOGY_IP='
+     line: TOPOLOGY_IP={{ top_ip_1 }}
+
+
+  ######Uninstalling Complete System ##############
+  - name: Uninstalling PNMS
+    shell: 
+      cmd: ./uninstallInHaMode.sh
+      chdir: "{{ install_dir }}/{{ untar_dir }}/bin" #/home/padtec/ansible_abhishek/OTS12_EKINMS_V1.1.16/bin
+    args:
+      executable: /bin/bash
+    register: cmd_output
+    tags:
+     - uninstall
+  - debug:
+     msg: "{{ cmd_output.stdout_lines }}"
+    tags:
+     - uninstall
+###### Deleting mysql users ##############
+  - name: Deleting mysql users
+    shell:
+      cmd: mysql -uroot -ppadtec -e "delete from mysql.user where User in('ncs', 'pnms');"
+    args:
+      executable: /bin/bash
+    register: cmd_output
+    tags:
+     - uninstall
+  - debug:
+     msg: "{{ cmd_output.stdout_lines }}"
+    tags:
+     - uninstall
+
+######## Installing PNMS  ##############
+  - name: Installing PNMS
+    shell: 
+      cmd: ./installPNMS.sh -install installPNMS.properties
+    args:
+      chdir: "{{ install_dir }}/{{ untar_dir }}/bin" #/home/padtec/ansible_abhishek/OTS12_EKINMS_V1.1.16/bin
+      executable: /bin/bash
+    register: cmd_output
+    tags:
+     - install_pnms
+  - debug:
+     msg: "{{ cmd_output.stdout_lines }}"
+    tags:
+     - install_pnms
+  ######### Configuring Database ##############
+  - name: Configuring Database
+    shell: 
+      cmd: ./../etc/configure_database.sh
+    args:
+      chdir: "{{ install_dir }}/{{ untar_dir }}/bin" #/home/padtec/ansible_abhishek/OTS12_EKINMS_V1.1.16/bin
+      executable: /bin/bash
+    register: cmd_output
+  - debug:
+     msg: "{{ cmd_output.stdout_lines }}"
+  ###### Installing Topology ######
+  - name: Installing Topology
+    shell: 
+        cmd: ./installTopology.sh -install installTopology.properties
+    args:
+        chdir: "{{ install_dir }}/{{ untar_dir }}/bin" #/home/padtec/ansible_abhishek/OTS12_EKINMS_V1.1.16/bin
+        executable: /bin/bash
+    when: (nms_ip_1 != top_ip_1)
+    register: cmd_output
+  - debug:
+       msg: "{{ cmd_output.stdout_lines }}"
+    when: (nms_ip_1 != top_ip_1)
+  ###### Installing Mediator ######
+  - name: Installing Mediator
+    shell: 
+      cmd: ./installMediator.sh -install installMediator.properties
+      chdir: "{{ install_dir }}/{{ untar_dir }}/bin" #/home/padtec/ansible_abhishek/OTS12_EKINMS_V1.1.16/bin
+    args:
+      executable: /bin/bash
+    register: cmd_output
+  - debug:
+     msg: "{{ cmd_output.stdout_lines }}"
+  ########## Installing Domain Manager #############
+  - name: Installing Domain Manager
+    shell: 
+      cmd: ./installDomainManager.sh -install installDomainManager.properties
+      chdir: "{{ install_dir }}/{{ untar_dir }}/bin" #/home/padtec/ansible_abhishek/OTS12_EKINMS_V1.1.16/bin
+    args:
+      executable: /bin/bash
+    register: cmd_output
+  - debug:
+     msg: "{{ cmd_output.stdout_lines }}"
+  ########## Creating NCS DB  ###############
+  - name: Domain Manager Start
+    shell: |
+           cd ../dminstall/domainmanager/bin; 
+           source ~/.ncs_env; 
+           ./rundomainmanager.sh start
+    args:
+      chdir: "{{ install_dir }}/{{ untar_dir }}/bin" #/home/padtec/ansible_abhishek/OTS12_EKINMS_V1.1.16/bin
+      executable: /bin/bash
+    register: cmd_output
+  - debug:
+     msg: "{{ cmd_output.stdout_lines }}"
+  ########## Populating Node Manager DB ###############
+  - name: Populate Node Manager DB
+    shell: 
+      cmd: ./populateNodeManagerdb.sh installPNMS.properties
+    args:
+      chdir: "{{ install_dir }}/{{ untar_dir }}/bin" #/home/padtec/ansible_abhishek/OTS12_EKINMS_V1.1.16/bin
+      executable: /bin/bash
+    register: cmd_output
+  - debug:
+     msg: "{{ cmd_output.stdout_lines }}"
+  ########## Updating Notification Pointer ####################
+  - name: Updating Notfication Pointer
+    shell: 
+      cmd: ./updateNotificationPointer.sh
+    args:
+      chdir: "{{ install_dir }}/{{ untar_dir }}/bin" #/home/padtec/ansible_abhishek/OTS12_EKINMS_V1.1.16/bin
+      executable: /bin/bash
+    register: cmd_output
+  - debug:
+     msg: "{{ cmd_output.stdout_lines }}"
+
+  ########## Copying files remotely #################
+  - name: Copy start script from local to remote
+    copy:
+      src: /etc/ansible/pnms-installation/nonHA/startInNonHaMode_nonHA.sh
+      dest: "{{ install_dir }}/{{ untar_dir }}/bin" #/home/padtec/ansible_abhishek/OTS12_EKINMS_V1.1.16/bin
+    
+      #  - name: Copy start script from local to remote
+      #    copy:
+      #      src: /etc/ansible/pnms-installation/nonHA/startInNonHaMode_onlyPNMS.sh
+      #      dest: "{{ install_dir }}/{{ untar_dir }}/bin" #/home/padtec/ansible_abhishek/OTS12_EKINMS_V1.1.16/bin
+      #
+  ########## Changing file ownership remotely #################
+  - name: Changing start scripts ownership
+    file:
+      path: "{{ install_dir }}/{{ untar_dir }}/bin/startInNonHaMode_nonHA.sh"
+      mode: '0755'
+
+      #  - name: Changing start scripts ownership
+      #    file:
+      #      path: "{{ install_dir }}/{{ untar_dir }}/bin/startInNonHaMode_onlyPNMS.sh"
+      #      mode: '0755'
+      #
+      ########## Running startInNonHaMode_nonHA.sh Start script remotely #################
+  - name: Start NMS, mediator, NCS, Domain Manager
+    shell: "(cd '{{ install_dir }}/{{ untar_dir }}/bin'; ./startInNonHaMode_nonHA.sh > startInNonHaMode_nonHA.log 2>&1 &)"
+    args:
+      executable: /bin/bash
+    async: 10
+    poll: 0
+    register: cmd_output
+    tags:
+     - start
+  - debug:
+     msg: "{{ cmd_output }}"
+    tags:
+     - start
+
+       #- pause:
+       #   minutes: 2
+
+
+### Checking UI of Celestis NodeManager
+  - name: "Waiting for Nodemanager UI to be accessbile"
+    uri:
+       url: "http://{{ nms_ip_1 }}:8080/nodemanager"
+       status_code: 200
+    register: result
+    until: result.status == 200
+    retries: 12
+    delay: 10
+
+    #  - name: Checking that NodeManager UI is accessible ("https://{{ nms_ip_1 }}:8080/nodemanager")
+#    connection: local
+#    get_url:
+#     url: "http://{{ nms_ip_1 }}:8080/nodemanager"
+#     dest: /etc/ansible/nm.out
+#     use_proxy: no
+#    register: response
+#    #until: response.status_code == 200
+#    tags:
+#     - gui
+#  - debug:
+#     msg: "{{ response }}"
+#
+
+### Checking UI of Celestis PNMS
+  - name: "Waiting for Celestis UI to be accessible"
+    uri:
+       url: "http://{{ nms_ip_1 }}:8080/celestis"
+       status_code: 200
+    register: result
+    until: result.status == 200
+    retries: 12
+    delay: 10
+
+    #  - name: Checking that NMS UI is accessible ("https://{{ nms_ip_1 }}:8080/celestis")
+#    connection: local
+#    get_url:
+#     url: "http://{{ nms_ip_1 }}:8080/celestis"
+#     dest: /etc/ansible/abhishek/celestis.out
+#     use_proxy: no
+#    register: response
+#    until: response.status_code == 200
+#  - debug:
+#     msg: "{{ response }}"
+
+  ########## Running startInNonHaMode_onlyPNMS.sh Start script remotely #################
+  - name: Run file startInNonHaMode_onlyPNMS.sh at dest
+    shell:
+      cmd: ./startInNonHaMode_onlyPNMS.sh 
+      chdir: "{{ install_dir }}/{{ untar_dir }}/bin" #/home/padtec/ansible_abhishek/OTS12_EKINMS_V1.1.16/bin
+    args:
+      executable: /bin/bash
+    register: cmd_output
+    tags:
+     - ToBeDone
+  - debug:
+     msg: "{{ cmd_output.stdout_lines }}"
+    tags:
+     - ToBeDone

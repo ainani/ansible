@@ -1,0 +1,15 @@
+- hosts: NMS_IP_BKP
+  gather_facts: no
+  tasks:
+    - name: Create a group of all hosts by app_type
+      group_by: key={{mediator_ip}}
+
+    - debug: msg="groups={{groups['NMS_IP']}}"
+      run_once: true
+
+      #- hosts: *:&IP
+      #  gather_facts: no
+
+      #  tasks:
+      #   - debug: msg="play_hosts={{ansible_play_batch}}"
+      #     run_once: true

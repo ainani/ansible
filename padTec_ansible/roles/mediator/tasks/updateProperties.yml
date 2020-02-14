@@ -1,0 +1,12 @@
+  - name: Updating installMediator.properties file
+    lineinfile:
+      path: "{{ install_dir }}/{{ untar_dir }}/bin/installMediator.properties"
+      regexp: '^PNMS_IP_ADDRESS='
+      line: PNMS_IP_ADDRESS={{ ansible_host }}
+
+  - name: Updating installMediator.properties file
+    lineinfile:
+      path: "{{ install_dir }}/{{ untar_dir }}/bin/installMediator.properties"
+      regexp: '^MEDIATOR_IP_ADDRESS='
+      line: MEDIATOR_IP_ADDRESS={{ ansible_host }}
+

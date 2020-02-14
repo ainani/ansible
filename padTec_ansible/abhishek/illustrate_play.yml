@@ -1,0 +1,34 @@
+---
+- hosts: localhost
+  tasks:
+  - name: Run command 
+    command: echo "Hello World !"
+  - name: Print message using debug module
+    debug:
+     msg: This is debug message
+
+- hosts: all
+  tasks:
+  - name: Will Run on all servers
+    debug: 
+     msg: Hello All
+  - name: Will end the play
+    meta: end_play
+
+- hosts: NMS_IP
+  tasks:
+  - name: Install NMS
+    debug:
+     msg: Installing NMS
+    tags:
+     - install_nms
+  - name: Install NCS
+    debug:
+     msg: Installing NCS
+    tags:
+     - install_ncs
+  - name: Install Mediator
+    debug:
+     msg: Installing Mediator
+    tags:
+     - install_med

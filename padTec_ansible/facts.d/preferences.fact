@@ -1,0 +1,5 @@
+[Device_facts]
+installDir=/opt/padtec/scripts
+buildPath=/home/padtec/device-installation
+scriptName=verify_device_state.sh
+

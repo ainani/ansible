@@ -1,0 +1,13 @@
+  ########## Creating NCS DB  ###############
+  - name: Domain Manager Start
+    shell: |
+           cd ../dminstall/domainmanager/bin;
+           source ~/.ncs_env;
+           ./rundomainmanager.sh start
+    args:
+      chdir: "{{ install_dir }}/{{ untar_dir }}/bin" #/home/padtec/ansible_abhishek/OTS12_EKINMS_V1.1.16/bin
+      executable: /bin/bash
+    register: cmd_output
+  - debug:
+     msg: "{{ cmd_output.stdout_lines }}"
+

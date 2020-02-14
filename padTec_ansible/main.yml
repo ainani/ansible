@@ -1,0 +1,18 @@
+- hosts: Build_Server
+  tasks:
+  - include_role:
+       name:   common
+  - debug:
+       msg: "{{isHA}}"
+  - debug:
+       msg: "{{build_name}}"
+  - name: Run the test script after running common role
+    shell:
+         cmd: ./test_script.sh "{{isHA}}"
+         chdir: /etc/ansible/hkaur
+    args:
+         executable: /bin/bash
+    register: cmd_output
+  - debug:
+         msg: "{{ cmd_output.stdout_lines }}"
+

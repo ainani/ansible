@@ -1,0 +1,35 @@
+  ######Uninstalling Complete System ##############
+  - name: Uninstallation Block of PNMS
+    block:
+     - name: Finding uninstall Path
+       shell: |
+            ps -eaf | grep java | grep -v grep | grep appserver |  cut -d "-" -f "15" | cut -d " " -f "2" | cut -d "/" -f "1-5"
+       register: shell_output
+
+     - name: Registering Uninstall Path
+       set_fact:
+        uninstall_path: "{{ shell_output.stdout_lines  |  replace(']','') |  replace('[','') | replace('u','') | replace(\"'\", '') }}/bin"
+       when: ( shell_output.stdout ) != ""
+
+     - block:
+       - name: Uninstalling PNMS
+         shell:
+          cmd: ./uninstallInHaMode.sh
+          chdir: "{{ uninstall_path }}"
+         args:
+          executable: /bin/bash
+         register: cmd_output
+       - debug:
+          msg: "{{ cmd_output.stdout_lines }}"
+
+       - name: Deleting mysql users
+         shell: "(mysql -uroot -ppadtec -e \"delete from mysql.user where User in('ncs', 'pnms');\")"
+         args:
+          executable: /bin/bash
+         register: cmd_output
+       - debug:
+          msg: "{{ cmd_output.stdout_lines }}"
+       when: uninstall_path is defined
+    tags:
+      - uninstall
+

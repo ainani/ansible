@@ -1,0 +1,49 @@
+- hosts: localhost
+  #  connection: local
+  become: false
+  tasks:
+  - name: Create a file
+    file: path=/home/padtec/ansibleTest.txt state=touch
+
+- hosts: NMS_1
+  vars:
+        src_item: "/home/padtec/Jenkins_build/builds/R1.1.16/B32_J41/OTS12_EKINMS_V1.1.16.tar.gz"
+        dest_item: "/home/padtec/OTS12_EKINMS_V1.1.16.tar.gz"
+
+  become: false
+  tasks:
+  - name: Copy file from source to dest path
+    copy:
+      src: /etc/ansible/abhishek/startInNonHaMode_nonHA.sh
+      #src: /home/padtec/ansibleTest.txt
+      dest: /home/padtec/ansible_abhishek/OTS12_EKINMS_V1.1.16/bin
+    tags:
+     - copy
+
+  - name:  Modifying file at dest path
+    copy: 
+#      src: /home/padtec/ansibleTest.txt
+      content: "#Copying Contents 
+                Hello Harleen!!"
+      dest: /tmp/temp_hkaur/ansibleTest.txt
+      when: "{{ hosts == '172.19.79.75' }}"
+
+  - name: Fetch file from remote to local path after update
+    fetch:
+      src: "{{ src_item }}"
+      #src: /tmp/temp_hkaur/ansibleTest.txt
+      dest: "{{ dest_item }}"
+      flat: yes
+
+- hosts: localhost
+  vars:
+        src_item: "/home/padtec/Jenkins_build/builds/R1.1.16/B32_J41/OTS12_EKINMS_V1.1.16.tar.gz"
+        dest_item: "/home/padtec/OTS12_EKINMS_V1.1.16.tar.gz"
+
+  tasks:
+  - name: Unarchive the tar.gz
+    unarchive:
+            #     src: /home/padtec/Jenkins_build/builds/R1.1.16/B32_J41/OTS12_EKINMS_V1.1.16.tar.gz
+            src: "{{ dest_item }}"
+            dest: /home/padtec/NMS_build_installation
+            #remote_src: yes

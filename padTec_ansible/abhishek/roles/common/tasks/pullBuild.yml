@@ -1,0 +1,6 @@
+- name: Pulling build from build server
+  fetch:
+    src: "{{ buildPath }}/{{ buildName }}" #"/home/padtec/Jenkins_build/builds/R1.1.16/B31_J40/OTS12_EKINMS_V1.1.16.tar.gz"
+    dest: /etc/ansible/abhishek/
+    flat: yes
+

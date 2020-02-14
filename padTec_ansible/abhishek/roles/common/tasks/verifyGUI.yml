@@ -1,0 +1,26 @@
+  ### Checking UI of Celestis NodeManager
+    - name: Check NodeManager UI
+      connection: local
+      get_url:
+       url: "http://{{ nms_ip_1 }}:8080/nodemanager"
+       dest: /etc/ansible/abhishek/nm.out
+       use_proxy: no
+      register: response
+      until: response.status_code == 200
+    - debug:
+       msg: "{{ response }}"
+
+
+  ### Checking UI of Celestis PNMS
+    - name: Check that NMS UI
+      connection: local
+      get_url:
+       url: "http://{{ nms_ip_1 }}:8080/celestis"
+       dest: /etc/ansible/abhishek/celestis.out
+       use_proxy: no
+      register: response
+      until: response.status_code == 200
+    - debug:
+       msg: "{{ response }}"
+
+

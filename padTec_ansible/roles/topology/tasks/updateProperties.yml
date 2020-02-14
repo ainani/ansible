@@ -1,0 +1,12 @@
+  - name: Updating installTopology.properties file
+    lineinfile:
+      path: "{{ install_dir }}/{{ untar_dir }}/bin/installTopology.properties"
+      regexp: '^INSTALL_TOPOLOGY_DIR='
+      line: INSTALL_TOPOLOGY_DIR={{ install_dir }}/{{ untar_dir }}/topologyinstall
+
+  - name: Updating installTopology.properties file
+    lineinfile:
+     path: "{{ install_dir }}/{{ untar_dir }}/bin/installTopology.properties"
+     regexp: '^TOPOLOGY_IP='
+     line: TOPOLOGY_IP={{ ansible_host }}
+

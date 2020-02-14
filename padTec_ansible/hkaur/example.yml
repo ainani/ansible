@@ -1,0 +1,27 @@
+#- hosts: Device_group
+#  gather_facts: no
+#  vars:
+#          buildPath: "{{ hostvars['host-1'].buildPath }}"
+#          scriptName: "{{ hostvars['host-1'].scriptName }}"
+#          install_dir: "{{ hostvars['host-1'].installDir }}"
+# tasks:
+  - name:
+    connection: local
+    shell: echo "{{testvar}}"
+  - debug:
+          msg: "{{  testvar }}"
+  - debug:
+          msg: "{{  testnew }}"
+
+  - meta: end_play
+  - debug:
+          msg: "{{ ansible_host.buildPath }}"
+    # Set myvar fact for every host in a play
+  - set_fact:
+        myvar: "{{ inventory_hostname }}"
+    delegate_to: "{{ item }}"
+    with_items: "{{ play_hosts }}"
+    run_once: yes
+  # Ensure that myvar is a name of the first host
+  - debug:
+        msg: "{{ myvar }}"

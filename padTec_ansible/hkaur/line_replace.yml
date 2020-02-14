@@ -1,0 +1,125 @@
+---
+# This playbook runs a basic DF command.
+
+- hosts: NMS_1
+  gather_facts: no
+  #remote_user: root
+  vars:
+       isHA: "{{ lookup('ini', 'isHA section=general file=config.ini') }}"
+       install_dir: "{{ lookup('ini', 'installDir section=general file=config.ini') }}"
+       build_name: "{{ lookup('ini', 'buildName section=general file=config.ini') }}"
+       nms_ip_1: "{{ lookup('ini', 'nms_ip_1 section=NMS_1 file=config.ini') }}"
+       med_ip_1: "{{ lookup('ini', 'med_ip_1 section=MED_1 file=config.ini') }}"
+       ncs_ip_1: "{{ lookup('ini', 'ncs_ip_1 section=NCS_1 file=config.ini') }}"
+  tasks:
+  - name:
+    vars:
+     gen_list: ""
+    set_fact:
+     gen_list: "{{ gen_list }} {{ item }}"
+    with_ini:
+       - '.* section=NMS_1 file=config.ini re=True'
+    register: out
+  - debug:
+        msg: "general list is {{ islist }}"
+        msg: "{{out}}"
+
+  - debug:
+      msg: 
+       - "isHA is set to :  {{ isHA | type_debug}}"
+       - "Installation Directory:  {{ install_dir }}"
+       - "Build Name:  {{ build_name }}"
+  - meta: end_play
+  - name: Unarchive the tar.gz
+    unarchive:
+     src: "{{ install_dir }}/{{ build_name }}"
+     dest: "{{ install_dir }}"
+     remote_src: yes
+     list_files: yes
+    register: archive_contents
+  - set_fact:
+      untar_dir: "{{ archive_contents.files[0].split('/')[0] }}"
+  - find:
+     paths: "{{ install_dir }}/{{ untar_dir }}/bin"
+     patterns: "*.properties"
+    register: prop_files
+  - name: Updating properties file common values
+    replace:
+     path: "{{ item.path }}"
+     regexp: '^BUILD_NAME=.*'
+     replace: BUILD_NAME={{ untar_dir }}
+    with_items: "{{ prop_files.files }}" 
+  - replace:
+     path: "{{ item.path }}"
+     regexp: '^PNMS_IP=.*'
+     replace: PNMS_IP={{ nms_ip_1 }}
+    with_items: "{{ prop_files.files }}" 
+  - replace:
+     path: "{{ item.path }}"
+     regexp: '^INSTALL_MED_DIR=.*'
+     replace: INSTALL_MED_DIR={{ install_dir }}/{{ untar_dir }}/medinstall
+    with_items: "{{ prop_files.files }}"
+  - replace:
+     path: "{{ item.path }}"
+     regexp: '^VIRTUAL_IP=.*'
+     replace: VIRTUAL_IP=127.0.0.1
+    when: (isHA | int)==0
+    with_items: "{{ prop_files.files }}"
+  
+
+  - name: Updating installPNMS.properties file
+    lineinfile:
+     path: "{{ install_dir }}/{{ untar_dir }}/bin/installPNMS.properties"
+     regexp: '^INSTALL_PADNMS_DIR='
+     line: INSTALL_PADNMS_DIR={{ install_dir }}/{{ untar_dir }}/etc
+  - lineinfile:
+      path: "{{ install_dir }}/{{ untar_dir }}/bin/installPNMS.properties"
+      regexp: '^INSTALL_PNMS_DIR='
+      line: INSTALL_PNMS_DIR={{ install_dir }}/{{ untar_dir }}/pnmsinstall
+  - lineinfile:
+      path: "{{ install_dir }}/{{ untar_dir }}/bin/installPNMS.properties"
+      regexp: '^INSTALL_MED_DIR='
+      line: INSTALL_MED_DIR={{ install_dir }}/{{ untar_dir }}/medinstall
+
+  - name: Updating installMediator.properties file
+    lineinfile:
+      path: "{{ install_dir }}/{{ untar_dir }}/bin/installMediator.properties"
+      regexp: '^PNMS_IP_ADDRESS='
+      line: PNMS_IP_ADDRESS={{ nms_ip_1 }}
+  - lineinfile:
+      path: "{{ install_dir }}/{{ untar_dir }}/bin/installMediator.properties"
+      regexp: '^MEDIATOR_IP_ADDRESS='
+      line: MEDIATOR_IP_ADDRESS={{ med_ip_1 }}
+
+
+
+  - name: Updating installDomainManager.properties file
+    lineinfile:
+      path: "{{ install_dir }}/installDomainManager.properties"
+      regexp: '^INSTALL_DOMAINMANAGER_DIR='
+      line: INSTALL_DOMAINMANAGER_DIR={{ install_dir }}/{{ untar_dir }}/dminstall
+  - lineinfile:
+     path: "{{ install_dir }}/installDomainManager.properties"
+     regexp: '^NCS_BINARY_FILE_PATH='
+     line: NCS_BINARY_FILE_PATH={{ install_dir }}/{{ untar_dir }}/pkg/domainmanager/lib
+  - lineinfile:
+     path: "{{ install_dir }}/installDomainManager.properties"
+     regexp: '^NCS_BINARY_INSTALL_PATH='
+     line: NCS_BINARY_INSTALL_PATH={{ install_dir }}/{{ untar_dir }}/ncs
+  - lineinfile:
+     path: "{{ install_dir }}/installDomainManager.properties"
+     regexp: '^HOST_IP_ADDRESS='
+     line: HOST_IP_ADDRESS={{ ncs_ip_1 }}
+  - lineinfile:
+     path: "{{ install_dir }}/installDomainManager.properties"
+     regexp: '^NCS_IP='
+     line: NCS_IP={{ ncs_ip_1 }}
+  - meta: end_play
+
+
+  - name: Updating installTopology.properties file
+    lineinfile:
+      path: "{{ install_dir }}/installTopology.properties"
+      regexp: '^NCS_IP='
+      line: NCS_IP={{ ncs_ip_1 }}
+

@@ -1,0 +1,56 @@
+[NMS_IP]
+nms_ip ansible_host=172.19.79.36
+
+[all]
+NMS_IP
+
+[Build_Server]
+172.19.79.75
+
+[Cluster_1]
+allInOne_ip ansible_host=172.19.79.144
+#MED_1 ansible_host=172.19.79.36
+#NCS_1 ansible_host=172.19.79.36
+#TOP_1 ansible_host=172.19.79.36
+
+[NMS_IP_BKP]
+nms_ip-1 ansible_host=172.19.79.144 mediator_ip=172.19.79.36 top_ip=172.19.79.200
+nms_ip-2 ansible_host=172.19.79.142 mediator_ip=172.19.79.32 top_ip=172.19.79.202
+
+
+
+[IP]
+nms_ip-1
+nms_ip-2
+
+
+[Cluster_1:vars]
+isHA=0
+installDir=/home/padtec/ansible_abhishek/
+buildPath=/home/padtec/Jenkins_build/builds/R1.1.16/B32_J41
+buildName=OTS12_EKINMS_V1.1.16.tar.gz
+uninstallPath=/home/padtec/builds_20191104/OTS12_EKINMS_V1.1.16/
+
+
+[Devices]
+172.19.79.59
+172.19.79.119
+
+[Devices:vars]
+#ansible_user=root  # ssh login user
+#ansible_become=yes  # use sudo 
+#ansible_become_method=sudo 
+ansible_password='{{ my_device_sudo_pass }}'
+installDir=/opt/padtec/scripts
+buildPath=/home/padtec/device-installation
+scriptName=verify_device_state.sh
+
+[Device_group]
+host-1 ansible_ssh_host=172.19.79.59 
+host-2 ansible_ssh_host=172.19.79.119
+
+[Device_group:vars]
+ansible_password='{{ my_device_sudo_pass }}'
+installDir=/opt/padtec/scripts
+buildPath=/home/padtec/device-installation
+scriptName=verify_device_state.sh

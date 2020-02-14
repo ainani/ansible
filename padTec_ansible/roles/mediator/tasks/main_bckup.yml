@@ -1,0 +1,6 @@
+- hosts: Cluster_1
+  vars:
+   med_ip_1: "{{ hostvars['allInOne_ip'].ansible_host }} "
+  tasks:
+  #  - include: updateProperties.yml
+  - include: uninstallMediator.yml

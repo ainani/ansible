@@ -1,0 +1,23 @@
+- hosts: CLUSTER
+  tasks:
+  - debug:
+        msg: "{{ ansible_host }}"
+  - debug:
+        msg: "{{ installDir }}"
+  - debug:
+        msg: "{{ virtual_ip_nms }}"
+  - name: Running common Tasks
+    include_role: 
+     name: common
+  - name: Updating PNMS property file
+    include_tasks: roles/pnms/tasks/updateProperties.yml
+  - name: Updating Topology property file
+    include_tasks: roles/topology/tasks/updateProperties.yml
+  - name: Updating Mediator property file
+    include_tasks: roles/mediator/tasks/updateProperties.yml
+  - name: Updating Node Manager property file
+    include_tasks: roles/nodeManager/tasks/updateProperties.yml
+  - name: Updating Domain Manager property file
+    include_tasks: roles/domainManager/tasks/updateProperties.yml
+
+  - meta: end_play

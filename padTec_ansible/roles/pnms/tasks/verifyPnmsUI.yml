@@ -1,0 +1,10 @@
+### Checking UI of Celestis PNMS
+  - name: "Waiting for Celestis UI to be accessible"
+    uri:
+       url: "http://{{ ansible_host }}:8080/celestis"
+       status_code: 200
+    register: result
+    until: result.status == 200
+    retries: 12
+    delay: 10
+

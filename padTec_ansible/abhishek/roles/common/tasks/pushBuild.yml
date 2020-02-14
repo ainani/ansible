@@ -1,0 +1,8 @@
+ ###### Push the build tar to remote servers #########
+  - name: Push tar file to nodes
+    copy:
+      src: "/etc/ansible/abhishek/{{ buildName }}" #OTS12_EKINMS_V1.1.16.tar.gz
+      dest: "{{ installDir }}"
+      follow: yes
+
+

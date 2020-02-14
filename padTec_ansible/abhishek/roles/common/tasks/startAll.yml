@@ -1,0 +1,20 @@
+  ########## Running startInNonHaMode_nonHA.sh Start script remotely #################
+  - name: Start NMS, mediator, NCS, Domain Manager
+    shell: "(cd /home/padtec/ansible_abhishek/OTS12_EKINMS_V1.1.16/bin; ./startInNonHaMode_nonHA.sh > startInNonHaMode_nonHA.log 2>&1 &)"
+    #shell: "(cd '{{ install_dir }}/{{ untar_dir }}/bin'; ./startInNonHaMode_nonHA.sh > startInNonHaMode_nonHA.log 2>&1 &)"
+    #ignore_errors: true
+    args:
+      executable: /bin/bash
+    async: 10
+    poll: 0
+      #chdir: "{{ install_dir }}/{{ untar_dir }}/bin" #/home/padtec/ansible_abhishek/OTS12_EKINMS_V1.1.16/bin
+    register: cmd_output
+    tags:
+     - start
+  - debug:
+     msg: "{{ cmd_output }}"
+    tags:
+     - start
+     - print_action
+
+

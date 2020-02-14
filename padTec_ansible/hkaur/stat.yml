@@ -1,0 +1,14 @@
+- hosts: localhost
+  tasks:
+  - name: check if rules file exists
+    stat:
+      path: /etc/ansible
+    register: ansible_rules
+  - debug:
+          msg: "{{ ansible_rules }}"
+  - set_fact:
+          ifexists: "{{ ansible_rules.stat.exists }}"
+  - meta: end_play
+    when: ifexists == true
+  - debug:
+          msg: "{{ ifexists }}"

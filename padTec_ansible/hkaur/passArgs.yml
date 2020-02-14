@@ -1,0 +1,7 @@
+- hosts: localhost
+  tasks:
+#  - name: Pass argument
+  - include: example.yml
+    vars:
+        testvar: "hello" 
+        testnew: 1

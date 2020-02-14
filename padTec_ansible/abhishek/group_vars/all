@@ -1,0 +1,6 @@
+isHA: 0
+installDir: /home/padtec/ansible_abhishek/
+buildPath: /home/padtec/Jenkins_build/builds/R1.1.16/B32_J41
+buildName: OTS12_EKINMS_V1.1.16.tar.gz
+uninstallPath: /home/padtec/builds_20191104/OTS12_EKINMS_V1.1.16/
+

@@ -1,0 +1,26 @@
+- hosts: CLUSTER_1
+  #connection: local
+  #gather_facts: no
+  tasks:
+  - debug:
+        msg: "{{ nms_ip }}"
+  - debug:
+        msg: "{{ med_ip }}"
+  - debug:
+        msg: "{{ ncs_ip }}"
+  - meta: end_play
+  - name: Running common Tasks
+    #  include_tasks: roles/common/tasks/main.yml
+    include_role: 
+     name: common
+  - meta: end_play
+
+  - name: Print the host variables if NMS
+    block:
+    - name: run script
+      shell: ./hkaur/test_script.sh {{ buildPath }}
+      #shell: ./hkaur/test_script.sh {{ virtual_ip_nms }}
+      register: cmd_output
+    - debug:
+       msg: "{{ cmd_output.stdout_lines }}"
+    when: (ansible_host) in (nms_ip) 

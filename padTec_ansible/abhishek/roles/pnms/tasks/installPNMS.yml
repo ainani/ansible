@@ -1,0 +1,15 @@
+  ######## Installing PNMS  ##############
+  - name: Installing PNMS
+    shell:
+      cmd: ./installPNMS.sh -install installPNMS.properties
+    args:
+      chdir: "{{ install_dir }}/{{ untar_dir }}/bin" #/home/padtec/ansible_abhishek/OTS12_EKINMS_V1.1.16/bin
+      executable: /bin/bash
+    register: cmd_output
+    tags:
+     - install_pnms
+  - debug:
+     msg: "{{ cmd_output.stdout_lines }}"
+    tags:
+     - install_pnms
+

@@ -1,0 +1,36 @@
+  - name: Updating installDomainManager.properties file
+    lineinfile:
+      path: "{{ installDir }}/{{ untar_dir }}/bin/installDomainManager.properties"
+      regexp: '^INSTALL_DOMAINMANAGER_DIR='
+      line: INSTALL_DOMAINMANAGER_DIR={{ installDir }}/{{ untar_dir }}/dminstall
+
+  - name: Updating installDomainManager.properties file
+    lineinfile:
+     path: "{{ installDir }}/{{ untar_dir }}/bin/installDomainManager.properties"
+     regexp: '^NCS_BINARY_FILE_PATH='
+     line: NCS_BINARY_FILE_PATH={{ installDir }}/{{ untar_dir }}/pkg/domainmanager/lib
+
+  - name: Updating installDomainManager.properties file
+    lineinfile:
+     path: "{{ installDir }}/{{ untar_dir }}/bin/installDomainManager.properties"
+     regexp: '^NCS_BINARY_INSTALL_PATH='
+     line: NCS_BINARY_INSTALL_PATH={{ installDir }}/{{ untar_dir }}/ncs
+
+  - name: Updating installDomainManager.properties file
+    lineinfile:
+     path: "{{ installDir }}/{{ untar_dir }}/bin/installDomainManager.properties"
+     regexp: '^HOST_IP_ADDRESS='
+     line: HOST_IP_ADDRESS={{ ansible_host }}
+
+  - name: Updating installDomainManager.properties file
+    lineinfile:
+     path: "{{ installDir }}/{{ untar_dir }}/bin/installDomainManager.properties"
+     regexp: '^NCS_IP='
+     line: NCS_IP={{ ansible_host }}
+
+  - name: Updating installDomainManager.properties file
+    lineinfile:
+     path: "{{ installDir }}/{{ untar_dir }}/bin/installDomainManager.properties"
+     regexp: '^NODEMANAGER_IP='
+     line: NODEMANAGER_IP={{ ansible_host }}
+

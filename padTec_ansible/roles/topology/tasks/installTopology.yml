@@ -1,0 +1,13 @@
+  ###### Installing Topology ######
+  - name: Installing Topology
+    shell:
+        cmd: ./installTopology.sh -install installTopology.properties
+    args:
+        chdir: "{{ install_dir }}/{{ untar_dir }}/bin" #/home/padtec/ansible_abhishek/OTS12_EKINMS_V1.1.16/bin
+        executable: /bin/bash
+    #when: (nms_ip_1 != top_ip_1)
+    register: cmd_output
+  - debug:
+       msg: "{{ cmd_output.stdout_lines }}"
+    #when: (nms_ip_1 != top_ip_1)
+

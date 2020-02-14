@@ -1,0 +1,36 @@
+#- hosts: localhost
+#  tasks:
+#  - name:
+#    set_fact:
+#      nms_ip: "{{ groups['NMS'] }}"
+- hosts: ALL
+  gather_facts: no
+  connection: local
+  #vars:
+  #  nms_ip: "{{ groups['NMS'] }}"
+  tasks:
+  - name:
+    set_fact:
+        nms_ip: "{{ groups['NMS'] }}"
+    when: nms_ip is not defined
+  - debug:
+        msg: "{{ virtual_ip_nms }}"
+      #- meta: end_play
+      #- name: Print the host and group variables
+      #shell: ./hkaur/test_script.sh {{ ansible_host }}
+      #register: cmd_output
+      #- debug:
+      #msg: "{{ cmd_output.stdout_lines }}"
+
+        #- name: Including host and group variables
+        #include_vars: host_vars/NMS
+        #include_vars: group_vars/all   
+  - name: Print the host variables if NMS
+    block:
+    - name: run script
+      shell: ./hkaur/test_script.sh {{ buildPath }}
+      #shell: ./hkaur/test_script.sh {{ virtual_ip_nms }}
+      register: cmd_output
+    - debug:
+       msg: "{{ cmd_output.stdout_lines }}"
+    when: (ansible_host) in (nms_ip) 

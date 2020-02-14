@@ -1,0 +1,35 @@
+---
+# This playbook runs a basic DF command.
+
+- hosts: NMS_1
+  #remote_user: root
+
+  tasks:
+  - name: find disk space available.
+    vars:
+      #nms_ip_1: "{{ lookup('ini', 'nms_ip_1 section=NMS_1 file=config.ini') }}"
+      nms_ip_1: "{{item}}"
+    #remote_user: padtec
+    lineinfile:
+      path: /home/padtec/abhishek/test.properties
+      regexp: '^PNMS_IP='
+      line: PNMS_IP={{ nms_ip_1 }}
+    with_ini:
+      - '.* section=NMS_1 file=config.ini re=True'
+    register: find_output
+  - set_fact:
+          nms_ip: find_output.results[0].item
+          #        msg: "{{nms_ip}}"
+  - debug:
+          #vars: 
+          # nms_ip: find_output.results[0].item
+         var: "{{nms_ip}}"
+
+         #  - debug:  
+         #msg: "{{item.item}}"
+         #with_items:  
+         #- "{{find_output.results}}"
+         #          var: find_output.results[1].item
+         #        msg: "{{ nms_ip_1 }}"
+
+

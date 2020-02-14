@@ -1,0 +1,6 @@
+  - name: Updating installNodeManager.properties file
+    lineinfile:
+      path: "{{ installDir }}/{{ untar_dir }}/bin/installNodeManager.properties"
+      regexp: '^INSTALL_NODEMANAGER_DIR='
+      line: INSTALL_NODEMANAGER_DIR={{ installDir }}/{{ untar_dir }}/installnodemanager
+

@@ -1,0 +1,30 @@
+- hosts: Cluster_1
+  tasks:
+  - include_role:
+       name:  common
+  - include: roles/pnms/tasks/uninstallPNMS.yml
+  - include: roles/common/tasks/updateCommonProperties.yml
+  - include_role:
+       name:  pnms
+  - include_role:
+       name:  mediator
+  - include_role:
+       name:  domainManager
+  - include_role:
+       name:  nodeManager
+  - include_role:
+       name:  topology
+  - include: roles/pnms/tasks/installPNMS.yml
+  - include: roles/common/tasks/configuringDB.yml
+  - include: roles/topology/tasks/installTopology.yml
+  - include: roles/mediator/tasks/installMediator.yml
+  - include: roles/domainManager/tasks/installDomainManager.yml
+  - include: roles/domainManager/tasks/runDomainManager.yml
+  - include: roles/nodeManager/tasks/populateNodeManager.yml
+  - include: roles/common/tasks/updateNotificationPointer.yml
+  - include: roles/common/tasks/startAll.yml
+    #- pause:
+    #    minutes: 2
+  - include: roles/nodeManager/tasks/verifyNodeManagerUI.yml
+  - include: roles/pnms/tasks/verifyPnmsUI.yml
+

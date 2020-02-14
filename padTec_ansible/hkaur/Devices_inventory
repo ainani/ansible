@@ -1,0 +1,9 @@
+[Device_group]
+host-1 ansible_ssh_host=172.19.79.31 
+host-2 ansible_ssh_host=172.19.79.32
+
+[Device_group:vars]
+ansible_password='{{ my_device_sudo_pass }}'
+installDir=/opt/padtec/scripts
+buildPath=/home/padtec/device-installation
+scriptName=verify_device_state.sh

@@ -1,0 +1,11 @@
+  ########## Updating Notification Pointer ####################
+  - name: Updating Notfication Pointer
+    shell:
+      cmd: ./updateNotificationPointer.sh
+    args:
+      chdir: "{{ install_dir }}/{{ untar_dir }}/bin" #/home/padtec/ansible_abhishek/OTS12_EKINMS_V1.1.16/bin
+      executable: /bin/bash
+    register: cmd_output
+  - debug:
+     msg: "{{ cmd_output.stdout_lines }}"
+

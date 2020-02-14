@@ -1,0 +1,78 @@
+#- hosts: localhost
+#  tasks:
+#  - name:
+#    set_fact:
+#          buildPath: "{{ lookup('ini', 'buildPath section=general file=config.ini') }}"
+#          scriptName: "{{ lookup('ini', 'scriptName section=general file=config.ini') }}"
+#          install_Dir: "{{ lookup('ini', 'installDir section=general file=config.ini') }}"
+  #tasks:
+  #- name: Pulling verify script
+  #  fetch:
+  #     src: "{{ buildPath }}/{{ scriptName }}"
+  #     dest: "/etc/ansible/hkaur/"
+  #     flat: yes
+
+- hosts: Device_group
+  remote_user: root
+  vars:
+          buildPath: "{{ hostvars['host-1'].buildPath }}"
+          scriptName: "{{ hostvars['host-1'].scriptName }}"
+          install_dir: "{{ hostvars['host-1'].installDir }}"
+  tasks:
+  ######## Push verify script to devices
+  - name: Push verify script to devices
+    copy:
+      src: "/etc/ansible/hkaur/{{ scriptName }}" #OTS12_EKINMS_V1.1.16.tar.gz
+      dest: "{{ install_dir }}"
+      follow: yes
+  ########## Changing file ownership remotely #################
+  - name: Changing verify script ownership
+    file:
+      path: "{{ install_dir }}/{{ scriptName }}"
+      mode: '0755'
+  ########## Stop Devices ################
+  - name: Stop Devices
+    shell: |
+           ./stop_scale_setup.sh
+           sleep 20s
+    args:
+        executable: /bin/bash
+        chdir: "{{ install_dir }}"
+    register: cmd_output
+  - debug:
+     msg: "{{ cmd_output.stdout_lines }}"
+
+  ########## Devices Cleanup ################
+  - name: Device Cleanup
+    shell: |
+           ./start_clean.sh
+           sleep 20s
+    args:
+        executable: /bin/bash
+        chdir: "{{ install_dir }}"
+    register: cmd_output
+  - debug:
+     msg: "{{ cmd_output.stdout_lines }}"
+
+  ########## Start Devices ################
+  - name: Start Devices
+    shell: |
+           ./start_scale_setup.sh
+           sleep 20s
+    args:
+        executable: /bin/bash
+        chdir: "{{ install_dir }}"
+    register: cmd_output
+  - debug:
+     msg: "{{ cmd_output.stdout_lines }}"
+
+  ########## Verify Devices State ################
+  - name: Verify Devices State
+    shell:
+        cmd: ./verify_device_state.sh
+    args:
+        executable: /bin/bash
+        chdir: "{{ install_dir }}"
+    register: cmd_output
+  - debug:
+     msg: "{{ cmd_output.stdout_lines }}"
