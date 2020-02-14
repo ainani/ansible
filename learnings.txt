@@ -1,0 +1,26 @@
+sudo apt upgrade
+sudo apt install software-properties-common
+sudo -E apt-add-repository --yes --update ppa:ansible/ansible
+sudo apt install ansible
+
+
+To run locally any commands:
+connection: local
+
+Keys generate:
+
+ssh-keygen -t rsa -C "172.19.79.237"
+ssh-copy-id padtec@172.19.79.237
+
+
+
+Edit Files with Ansible
+-------------------------
+- blockinfile will insert/remove multiple lines to the file. 
+- lineinfile is for the single line, 
+- replace module can be used to replace string.
+
+
+
+
+ansible all -m ping   --> to check if all IPs are connected or not

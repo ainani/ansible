@@ -1,0 +1,12 @@
+https://stackoverflow.com/questions/37675259/correct-way-to-create-dynamic-lists-in-ansible
+https://blog.crisp.se/2016/10/20/maxwenzin/how-to-append-to-lists-in-ansible
+https://serverfault.com/questions/685673/appending-to-lists-or-adding-keys-to-dictionaries-in-ansible
+https://stackoverflow.com/questions/57570394/how-to-convert-a-config-file-of-lines-to-a-dict-list-in-ansible
+https://stackoverflow.com/questions/42415671/ansible-replace-code-in-multiple-files-in-a-directory
+https://www.middlewareinventory.com/blog/ansible-shell-examples/
+https://stackoverflow.com/questions/25326386/ansible-define-inventory-at-run-time
+https://docs.ansible.com/ansible/latest/user_guide/playbooks_best_practices.html
+https://stackoverflow.com/questions/40027847/accessing-inventory-host-variable-in-ansible-playbook
+https://stackoverflow.com/questions/37225589/execute-ansible-task-on-different-hosts
+https://stackoverflow.com/questions/39347379/ansible-run-command-on-remote-host-in-background
+https://www.decodingdevops.com/
